@@ -1,0 +1,123 @@
+
+
+
+
+
+      1) php artisan make:model Customer -mcr
+
+
+      Go to model
+
+      <?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+
+
+
+class Student extends Model
+{
+    use HasFactory;
+
+    protected $fillable = [
+        'customerno', 'name', 'phone', 'address', // Add the fields you want to allow
+    ];
+}
+
+
+
+
+
+ 
+      2) Edit the migration file in database/migrations/xxxx_xx_xx_create_customers_table.php
+
+
+      public function up(): void
+    {
+        Schema::create('customers', function (Blueprint $table) {
+            $table->id();
+            $table->string('customerno');
+            $table->string('name');
+            $table->string('phone');
+            $table->string('address');
+            $table->timestamps();
+        });
+    }
+
+
+
+      3) php artisan migrate
+
+
+
+      4) Open routes/web.php and define routes for your CRUD operations:
+
+
+
+      use App\Http\Controllers\CustomerController;
+
+      Route::resource('customers', CustomerController::class)->middleware('auth');
+
+
+
+      5) Edit the ItemController in app/Http/Controllers/CustomerController.php:
+
+
+
+       use App\Models\Customer;
+use Illuminate\Http\Request;
+
+class StudentController extends Controller
+{
+    public function index()
+    {
+        $customers = Customer::all();
+        return view('customers.index', compact('customers'));
+    }
+
+    public function create()
+    {
+        return view('customers.create');
+    }
+
+    public function store(Request $request)
+    {
+        $request->validate([
+            'customerno' => 'required',
+            'name' => 'required',
+            'phone' => 'required',
+            'address' => 'required',
+        ]);
+
+        Customer::create($request->all());
+        return redirect()->route('customers.index')->with('success', 'Customer created successfully.');
+    }
+
+    public function edit(Customer $customer)
+    {
+        return view('customers.edit', compact('customer'));
+    }
+
+    public function update(Request $request, Customer $customer)
+    {
+        $customer->update($request->only(['customerno', 'name', 'phone', 'address']));
+        return redirect()->route('customers.index')->with('success', 'Customer updated successfully.');
+
+    }
+
+    public function destroy(Customer $customer)
+    {
+        $customer->delete();
+        return redirect()->route('customers.index')->with('success', 'Customer deleted successfully!');
+    }
+}
+
+
+
+
+     
+
+
+
